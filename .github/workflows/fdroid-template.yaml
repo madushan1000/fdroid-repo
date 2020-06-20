@@ -77,7 +77,7 @@ jobs:
         cd $GITHUB_WORKSPACE/$FDROID_REPO_PATH
         mkdir metadata || :
         mkdir unsigned || :
-        mv $GITHUB_WORKSPACE/$APP_PATH/app/build/outputs/apk/production/release/*.apk $GITHUB_WORKSPACE/$FDROID_REPO_PATH/unsigned/${APP_PACKAGE_NAME}_{$GITHUB_RUN_NUMBER}.apk 
+        mv $GITHUB_WORKSPACE/$APP_PATH/app/build/outputs/apk/production/release/*.apk $GITHUB_WORKSPACE/$FDROID_REPO_PATH/unsigned/${APP_PACKAGE_NAME}_${GITHUB_RUN_NUMBER}.apk 
         touch $GITHUB_WORKSPACE/$FDROID_REPO_PATH/metadata/$APP_PACKAGE_NAME.yml
         fdroid publish
         fdroid update --create-metadata
