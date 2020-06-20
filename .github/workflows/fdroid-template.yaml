@@ -17,8 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    
-
     - uses: actions/checkout@v2
       with:
         path: ${{ env.FDROID_REPO_PATH }}
@@ -28,6 +26,20 @@ jobs:
         repository: ${{ env.APP_REPO }}
         ref: ${{ env.APP_REPO_REF }}
         path: ${{ env.APP_PATH }}
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-caches-
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-wrapper-
       
     - name: Build gnucash
       run: |
@@ -37,6 +49,7 @@ jobs:
     - name: Include in fdroid repo
       run: |
         cd $GITHUB_WORKSPACE/$FDROID_REPO_PATH
+        mkdir metadata || :
         mkdir unsigned || :
         mv $GITHUB_WORKSPACE/$APP_PATH/app/build/outputs/apk/production/release/*.apk $GITHUB_WORKSPACE/$FDROID_REPO_PATH/unsigned/${APP_PACKAGE_NAME}_{$GITHUB_RUN_NUMBER}.apk 
         touch $GITHUB_WORKSPACE/$FDROID_REPO_PATH/metadata/$APP_PACKAGE_NAME.yml
