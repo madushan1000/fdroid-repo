@@ -5,17 +5,19 @@ on:
     paths: 
     - '.github/**'
 
+env:
+  FDROID_REPO_PATH: 'repo'
+  APP_REPO: 'JeanGarf/gnucash-android'
+  APP_REPO_REF: 'tw_develop'
+  APP_PATH: 'gnucash'
+  APP_PACKAGE_NAME: 'org.gnucash.android'
+
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-    - env:
-        FDROID_REPO_PATH: 'repo'
-        APP_REPO: 'JeanGarf/gnucash-android'
-        APP_REPO_REF: 'tw_develop'
-        APP_PATH: 'gnucash'
-        APP_PACKAGE_NAME: 'org.gnucash.android'
+    
 
     - uses: actions/checkout@v2
       with:
