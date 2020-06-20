@@ -40,7 +40,21 @@ jobs:
         key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-wrapper-
-      
+
+    - uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install fdroid server
+      run: pip3 install fdroidserver
+
     - name: Build gnucash
       run: |
         cd $GITHUB_WORKSPACE/$APP_PATH
