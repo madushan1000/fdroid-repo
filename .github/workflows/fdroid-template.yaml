@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Set env
-      env:
+    - env:
         FDROID_REPO_PATH: 'repo'
         APP_REPO: 'JeanGarf/gnucash-android'
         APP_REPO_REF: 'tw_develop'
