@@ -156,7 +156,7 @@ keydname = "CN=Madushan Nishanta, OU=None, O=None, L=None, ST=None, C=No"
 # the @ prefix.
 # keyaliases['com.example.another.plugin'] = '@com.example.another'
 
-
+keyaliases = {}
 keyaliases['org.gnucash.android'] = 'gnucash'
 
 # The full path to the root of the repository. It must be specified in
