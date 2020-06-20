@@ -78,12 +78,14 @@ jobs:
         mkdir metadata || :
         mkdir unsigned || :
         mv $GITHUB_WORKSPACE/$APP_PATH/app/build/outputs/apk/production/release/*.apk $GITHUB_WORKSPACE/$FDROID_REPO_PATH/unsigned/${APP_PACKAGE_NAME}_${GITHUB_RUN_NUMBER}.apk 
+        7z d $GITHUB_WORKSPACE/$FDROID_REPO_PATH/unsigned/${APP_PACKAGE_NAME}_${GITHUB_RUN_NUMBER}.apk META-INF/{MANIFEST.MF,CERT.SF,CERT.RSA}
         touch $GITHUB_WORKSPACE/$FDROID_REPO_PATH/metadata/$APP_PACKAGE_NAME.yml
         fdroid publish
         fdroid update --create-metadata
 
     - name: Commit to f-droid repo
       run: |
+        cd $GITHUB_WORKSPACE/$FDROID_REPO_PATH
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add -A
