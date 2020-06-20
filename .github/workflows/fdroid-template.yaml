@@ -1,0 +1,58 @@
+name: gnucash
+on:
+  push:
+    branches: [ master ]
+    paths: 
+    - '.github/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Set env
+      env:
+        FDROID_REPO_PATH: 'repo'
+        APP_REPO: 'JeanGarf/gnucash-android'
+        APP_REPO_REF: 'tw_develop'
+        APP_PATH: 'gnucash'
+        APP_PACKAGE_NAME: 'org.gnucash.android'
+
+    - uses: actions/checkout@v2
+      with:
+        path: ${{ env.FDROID_REPO_PATH }}
+    
+    - uses: actions/checkout@v2
+      with:
+        repository: ${{ env.APP_REPO }}
+        ref: ${{ env.APP_REPO_REF }}
+        path: ${{ env.APP_PATH }}
+      
+    - name: Build gnucash
+      run: |
+        cd $GITHUB_WORKSPACE/$APP_PATH
+        ./gradlew assembleProductionRelease
+    
+    - name: Include in fdroid repo
+      run: |
+        cd $GITHUB_WORKSPACE/$FDROID_REPO_PATH
+        mkdir unsigned || :
+        mv $GITHUB_WORKSPACE/$APP_PATH/app/build/outputs/apk/production/release/*.apk $GITHUB_WORKSPACE/$FDROID_REPO_PATH/unsigned/${APP_PACKAGE_NAME}_{$GITHUB_RUN_NUMBER}.apk 
+        touch $GITHUB_WORKSPACE/$FDROID_REPO_PATH/metadata/$APP_PACKAGE_NAME.yml
+        fdroid publish
+        fdroid update --create-metadata
+
+    - name: Commit to f-droid repo
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        git commit -m "$GITHUB_WORKFLOW version $GITHUB_RUN_NUMBER"
+        
+    - name: Push to f-droid repo
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        directory : ${{ env.FDROID_REPO_PATH }}
+        
+        
