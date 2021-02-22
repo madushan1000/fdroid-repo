@@ -11,6 +11,9 @@ env:
   APP_REPO_REF: 'master'
   APP_PATH: 'sunrise-social'
   APP_PACKAGE_NAME: 'social.sunrise.app'
+  PATCHSQL_REPO: 'sunrise-choir/ssb-patchql-android'
+  PATCHSQL_REPO_REF: 'master'
+  PATCHSQL_PATH: 'ssb-patchql-android'
   KEYSTORE: ${{ secrets.KEYSTORE }}
   KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
   KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -34,6 +37,13 @@ jobs:
         repository: ${{ env.APP_REPO }}
         ref: ${{ env.APP_REPO_REF }}
         path: ${{ env.APP_PATH }}
+
+    - name: "clone ${{ env.APP_REPO }}"
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ env.PATCHSQL_REPO }}
+        ref: ${{ env.PATCHSQL_REPO_REF }}
+        path: ${{ env.PATCHSQL_PATH }}
 
     - name: "retrive gradle cache"
       uses: actions/cache@v2
