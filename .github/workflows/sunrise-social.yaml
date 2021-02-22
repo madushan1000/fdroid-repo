@@ -69,7 +69,7 @@ jobs:
     - name: Build gnucash
       run: |
         cd $GITHUB_WORKSPACE/$APP_PATH
-        ./gradlew assembleProductionRelease
+        ./gradlew assembleRelease
     
     - name: Include in fdroid repo
       run: |
