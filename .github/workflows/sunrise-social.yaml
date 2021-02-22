@@ -1,0 +1,102 @@
+name: sunrise-social
+on:
+  push:
+    branches: [ master ]
+    paths: 
+    - '.github/workflows/sunrise-social.yaml'
+
+env:
+  FDROID_REPO_PATH: 'repo'
+  APP_REPO: 'sunrise-choir/sunrise-social-android-app'
+  APP_REPO_REF: 'master'
+  APP_PATH: 'sunrise-social'
+  APP_PACKAGE_NAME: 'social.sunrise.app'
+  KEYSTORE: ${{ secrets.KEYSTORE }}
+  KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+  KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: "dump keystore"
+      run: echo $KEYSTORE | base64 -d > /tmp/my.keystore
+
+    - name: "clone f-droid repo"
+      uses: actions/checkout@v2
+      with:
+        path: ${{ env.FDROID_REPO_PATH }}
+    
+    - name: "clone ${{ env.APP_REPO }}"
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ env.APP_REPO }}
+        ref: ${{ env.APP_REPO_REF }}
+        path: ${{ env.APP_PATH }}
+
+    - name: "retrive gradle cache"
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-caches-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-caches-
+
+    - name: "retrive gradle wrapper cache"
+      uses: actions/cache@v2
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-wrapper-
+
+    - name: "retrive pip cache"
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install fdroid server
+      run: pip3 install fdroidserver
+
+    - name: Build gnucash
+      run: |
+        cd $GITHUB_WORKSPACE/$APP_PATH
+        ./gradlew assembleProductionRelease
+    
+    - name: Include in fdroid repo
+      run: |
+        cd $GITHUB_WORKSPACE/$FDROID_REPO_PATH
+        mkdir metadata || :
+        mkdir unsigned || :
+        mv $GITHUB_WORKSPACE/$APP_PATH/app/build/outputs/apk/production/release/*.apk $GITHUB_WORKSPACE/$FDROID_REPO_PATH/unsigned/${APP_PACKAGE_NAME}_${GITHUB_RUN_NUMBER}.apk 
+        7z d $GITHUB_WORKSPACE/$FDROID_REPO_PATH/unsigned/${APP_PACKAGE_NAME}_${GITHUB_RUN_NUMBER}.apk META-INF/{MANIFEST.MF,CERT.SF,CERT.RSA}
+        touch $GITHUB_WORKSPACE/$FDROID_REPO_PATH/metadata/$APP_PACKAGE_NAME.yml
+        fdroid publish
+        fdroid update --create-metadata
+
+    - name: Commit to f-droid repo
+      run: |
+        cd $GITHUB_WORKSPACE/$FDROID_REPO_PATH
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        git commit -m "$GITHUB_WORKFLOW version $GITHUB_RUN_NUMBER"
+        
+    - name: Push to f-droid repo
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        directory : ${{ env.FDROID_REPO_PATH }}
+
+    - name: "delete keystore"
+      run: rm -rf /tmp/my.keystore
+        
+        
