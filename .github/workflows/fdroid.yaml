@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: "dummy step"
+      run: echo abc
     - name: "dump keystore"
       run: echo $KEYSTORE | base64 -d > /tmp/my.keystore
 
